@@ -1,88 +1,130 @@
-'use client';
+"use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function PostPropertyForm() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [location, setLocation] = useState("");
-  const [image, setImage] = useState("");
-  const router = useRouter();
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    location: "",
+    image: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch("/api/properties", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, price: parseFloat(price), location, image }),
-    });
-    router.push("/posts");
+    console.log("Submitting form data:", formData);
+    try {
+      const response = await fetch("/api/properties", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          price: parseFloat(formData.price), // Ensure price is a number
+        }),
+      });
+      console.log("Response status:", response.status);
+      const result = await response.json();
+      console.log("Response data:", result);
+      if (response.ok) {
+        setSuccess("Property posted successfully!");
+        setFormData({ title: "", description: "", price: "", location: "", image: "" });
+        setError("");
+      } else {
+        setError(result.error || "Failed to post property");
+        console.error("Error details:", result);
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      setError("An unexpected error occurred");
+    }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md font-[family-name:var(--font-geist-sans)]">
-      <h2 className="text-2xl font-bold mb-4">Post New Property</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="title" className="block text-gray-700">Title</label>
+    <div className="max-w-md mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Post a Property</h2>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {success && <p className="text-green-500 mb-4">{success}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium">
+            Title
+          </label>
           <input
-            type="text"
             id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-2 border rounded"
+            name="title"
+            type="text"
+            value={formData.title}
+            onChange={handleChange}
             required
+            className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="description" className="block text-gray-700">Description</label>
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium">
+            Description
+          </label>
           <textarea
             id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 border rounded"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
             required
+            className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="price" className="block text-gray-700">Price</label>
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium">
+            Price
+          </label>
           <input
-            type="number"
             id="price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="w-full p-2 border rounded"
+            name="price"
+            type="number"
+            value={formData.price}
+            onChange={handleChange}
             required
+            className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="location" className="block text-gray-700">Location</label>
+        <div>
+          <label htmlFor="location" className="block text-sm font-medium">
+            Location
+          </label>
           <input
-            type="text"
             id="location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="w-full p-2 border rounded"
+            name="location"
+            type="text"
+            value={formData.location}
+            onChange={handleChange}
             required
+            className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="image" className="block text-gray-700">Image URL</label>
+        <div>
+          <label htmlFor="image" className="block text-sm font-medium">
+            Image URL (optional)
+          </label>
           <input
-            type="text"
             id="image"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            className="w-full p-2 border rounded"
+            name="image"
+            type="text"
+            value={formData.image}
+            onChange={handleChange}
+            className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
         <button
           type="submit"
-          className="w-full rounded-full border border-solid border-transparent transition-colors bg-foreground text-background hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
         >
-          Post Property
+          Submit
         </button>
       </form>
     </div>

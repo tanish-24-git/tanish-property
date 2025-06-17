@@ -7,16 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node --project tsconfig.ts-node.json src/seed.ts"  },
+    "seed": "ts-node --project tsconfig.ts-node.json src/seed.ts"
+  },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.1",
     "@aws-sdk/client-rds": "^3.826.0",
-    "@prisma/client": "^6.9.0",
     "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
+    "firebase": "^11.9.1",
+    "firebase-admin": "^13.4.0",
     "next": "15.3.3",
     "next-auth": "^4.24.7",
-    "prisma": "^6.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

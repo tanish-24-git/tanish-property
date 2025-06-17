@@ -1,31 +1,43 @@
-import { PrismaClient } from "@prisma/client";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 async function seed() {
   const email = "admin@tanishproperty.com";
-  const hashedPassword = await bcrypt.hash("SecurePassword123!", 10);
+  const password = "SecurePassword123!";
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (!existingUser) {
-    await prisma.user.create({
-      data: {
+  try {
+    let userRecord = await adminAuth.getUserByEmail(email).catch(() => null);
+    if (!userRecord) {
+      userRecord = await adminAuth.createUser({
         email,
+        password,
+      });
+      await adminDb.collection("users").doc(userRecord.uid).set({
+        email,
+        id: userRecord.uid,
         password: hashedPassword,
         name: "Admin",
-      },
-    });
-    console.log("Admin user created");
-  } else {
-    console.log("Admin user already exists");
+      });
+      console.log("Admin user created successfully");
+    } else {
+      await adminDb.collection("users").doc(userRecord.uid).update({
+        password: hashedPassword,
+        name: "Admin",
+      });
+      console.log("Admin user password reset successfully");
+    }
+  } catch (err) {
+    console.error("Seed error:", err);
+    process.exit(1);
   }
 }
-
-seed().catch((e) => {
-  console.error("Seed error:", e);
-  process.exit(1);
-}).finally(() => prisma.$disconnect());
+seed()
+  .then(() => {
+    console.log("Seeding completed successfully");
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("Seeding failed:", err);
+    process.exit(1);
+  });

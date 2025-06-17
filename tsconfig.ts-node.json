@@ -4,7 +4,14 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    }
   },
-  "include": ["src/seed.ts"]
+  "include": ["src/seed.ts"],
+  "ts-node": {
+    "require": ["dotenv/config"]
+  }
 }
